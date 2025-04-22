@@ -20,7 +20,7 @@ public:
 
     httplib::Client getConnection();
 
-    void releaseConnection(httplib::Client conn);
+    void releaseConnection(httplib::Client& conn);
 
 private:
     std::string db_url_;

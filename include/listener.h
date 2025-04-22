@@ -6,6 +6,7 @@
 
 #include "httplib.h"
 
+#include "connect_pool.h"
 #include "methods.h"
 
 class Listener
@@ -19,6 +20,6 @@ public:
 private:
     std::string user_ip_;
     std::string user_port_;
-    httplib::Client data_base_;
+    ConnectPool db_pool_;
     httplib::Server server_;
 };

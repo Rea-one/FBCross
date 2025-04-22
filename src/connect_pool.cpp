@@ -12,7 +12,7 @@ ConnectPool::ConnectPool(const std::string &config_path)
     for (int i = 0; i < max_connections_; ++i)
     {
         httplib::Client conn(db_url_);
-        connection_queue_.push(conn);
+        connection_queue_.emplace(conn);
     }
     current_connections_ = max_connections_;
 }
@@ -31,13 +31,13 @@ httplib::Client ConnectPool::getConnection()
     }
 
     // 取出一个连接
-    httplib::Client conn = connection_queue_.front();
+    httplib::Client conn = std::move(connection_queue_.front());
     connection_queue_.pop();
     current_connections_--;
     return conn;
 }
 
-void ConnectPool::releaseConnection(httplib::Client conn)
+void ConnectPool::releaseConnection(httplib::Client& conn)
 {
     std::unique_lock<std::mutex> lock(mtx_);
     // 将连接放回连接池
