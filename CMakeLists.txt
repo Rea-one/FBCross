@@ -19,9 +19,9 @@ add_executable(FBCross
     src/main.cpp
     src/listener.cpp
     src/threads.cpp
-    src/database_utils.cpp
     src/connect_pool.cpp
-    src/FBCServer.cpp
+    src/workers.cpp
+    src/server.cpp
 )
 
 # 包含头文件目录

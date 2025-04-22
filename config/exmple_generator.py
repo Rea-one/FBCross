@@ -1,7 +1,7 @@
 import json
 
 
-passes = ['name']
+passes = ['connection_limit', 'worker_limit']
 
 def sanitize_value(value):
     """将值置为空值（根据类型）"""

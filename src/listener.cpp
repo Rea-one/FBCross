@@ -1,24 +1,28 @@
 #include "listener.h"
 
-Listener::Listener(const std::string &config_path): db_pool_(config_path)
+
+Listener::Listener(const std::string& sever_ip, int sever_port):
+    acceptor_(io_context_,
+        boost::asio::ip::tcp::endpoint{
+            boost::asio::ip::make_address(sever_ip),
+            static_cast<unsigned short>(sever_port)
+        })
 {
-    boost::property_tree::ptree config;
-    boost::property_tree::read_json(config_path, config);
-    user_ip_ = config.get<std::string>("nets.0.ip");
-    user_port_ = config.get<std::string>("nets.0.port");
+
 }
 
-Listener::~Listener()
+void Listener::start()
 {
-    server_.stop();
+    acceptor_.async_accept(
+        [this](boost::system::error_code ec, boost::asio::ip::tcp::socket sock)
+        {
+            handle_accept(std::move(sock));
+            start();
+        }
+    );
 }
 
-void Listener::Run(ConnectPool& pool, Tasks& tasks)
+void Listener::handle_accept(boost::asio::ip::tcp::socket&& socket)
 {
-    server_thread_ = std::thread([this, &pool, &tasks]()
-    {
-        server_.listen(user_ip_, std::stoi(user_port_));
-        auto target = pool.getConnection();
-        if (tasks.add_task(std::move(server_), pool))
-    });
+    pool_ -> submit(std::move(socket));
 }

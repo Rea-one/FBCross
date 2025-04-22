@@ -7,28 +7,23 @@
 #include <condition_variable>
 
 #include <boost/property_tree/json_parser.hpp>
-#include "httplib.h"
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+
 
 #include "methods.h"
 
-
 class ConnectPool
 {
-public:
-    ConnectPool(const std::string& config_path);
-    ~ConnectPool();
-
-    httplib::Client getConnection();
-
-    void releaseConnection(httplib::Client& conn);
-
 private:
-    std::string db_url_;
-    int max_connections_;
     int current_connections_;
+    int connect_limit_;
 
-    // 连接队列和同步机制
-    std::queue<httplib::Client> connection_queue_;
-    std::mutex mtx_;
-    std::condition_variable cond_;
+    std::queue<boost::asio::ip::tcp::socket> pool_;
+public:
+    ConnectPool(const int& connect_limit);
+    bool submit(boost::asio::ip::tcp::socket&& socket);
+    boost::asio::ip::tcp::socket get();
+    bool is_full();
+    bool is_empty();
 };

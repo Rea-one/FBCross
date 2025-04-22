@@ -1,48 +1,42 @@
 #include "connect_pool.h"
 
-ConnectPool::ConnectPool(const std::string &config_path)
+
+ConnectPool::ConnectPool(const int& connect_limit):
+    connect_limit_(connect_limit), current_connections_(0)
 {
-    boost::property_tree::ptree config;
-    boost::property_tree::read_json(config_path, config);
+}
 
-    db_url_ = get_url(config, 1);
-    max_connections_ = config.get<int>("nets.1.max_connections"); // 最大连接数
 
-    // 初始化连接池（预创建部分连接）
-    for (int i = 0; i < max_connections_; ++i)
+bool ConnectPool::submit(boost::asio::ip::tcp::socket&& socket)
+{
+    if (current_connections_ >= connect_limit_)
+        return false;
+    pool_.emplace(socket);
+    current_connections_ ++;
+}
+
+boost::asio::ip::tcp::socket ConnectPool::get()
+{
+    if (pool_.empty())
     {
-        httplib::Client conn(db_url_);
-        connection_queue_.emplace(conn);
+        boost::asio::io_context io_context_;
+        boost::asio::ip::tcp::endpoint endpoint(
+            boost::asio::ip::make_address("127.0.0.1"), 8080);
+        return boost::asio::ip::tcp::socket(io_context_, endpoint);
     }
-    current_connections_ = max_connections_;
+    auto socket = std::move(pool_.front());
+    pool_.pop();
+    current_connections_ --;
+    return socket;
 }
 
-ConnectPool::~ConnectPool()
+
+bool ConnectPool::is_full()
 {
+    return current_connections_ >= connect_limit_;
 }
 
-httplib::Client ConnectPool::getConnection()
+bool ConnectPool::is_empty()
 {
-    std::unique_lock<std::mutex> lock(mtx_);
-    // 等待可用连接
-    while (connection_queue_.empty())
-    {
-        cond_.wait(lock);
-    }
-
-    // 取出一个连接
-    httplib::Client conn = std::move(connection_queue_.front());
-    connection_queue_.pop();
-    current_connections_--;
-    return conn;
-}
-
-void ConnectPool::releaseConnection(httplib::Client& conn)
-{
-    std::unique_lock<std::mutex> lock(mtx_);
-    // 将连接放回连接池
-    connection_queue_.push(conn);
-    current_connections_++;
-    // 唤醒等待的线程
-    cond_.notify_one();
+    return pool_.empty();
 }
