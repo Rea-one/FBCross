@@ -6,10 +6,12 @@
 
 #include "httplib.h"
 
+#include "methods.h"
+
 class Listener
 {
 public:
-    Listener(std::string &config_path);
+    Listener(const std::string& config_path);
     ~Listener();
 
     void Run();
@@ -17,5 +19,6 @@ public:
 private:
     std::string user_ip_;
     std::string user_port_;
-    httplib::Server svr;
+    httplib::Client data_base_;
+    httplib::Server server_;
 };

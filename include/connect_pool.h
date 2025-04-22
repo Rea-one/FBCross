@@ -2,21 +2,33 @@
 
 #include <string>
 #include <vector>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
 
 #include <boost/property_tree/json_parser.hpp>
+#include "httplib.h"
+
+#include "methods.h"
+
 
 class ConnectPool
 {
 public:
-    ConnectPool(const std::string& config_file);
+    ConnectPool(const std::string& config_path);
     ~ConnectPool();
 
-    bool GetConnect(std::string& ip, int& port);
+    httplib::Client getConnection();
+
+    void releaseConnection(httplib::Client conn);
 
 private:
-    void LoadConfig(const std::string& config_file);
+    std::string db_url_;
+    int max_connections_;
+    int current_connections_;
 
-private:
-    std::vector<std::pair<std::string, int>> m_connects;
-    int m_index;
+    // 连接队列和同步机制
+    std::queue<httplib::Client> connection_queue_;
+    std::mutex mtx_;
+    std::condition_variable cond_;
 };
