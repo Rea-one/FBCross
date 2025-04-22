@@ -18,7 +18,10 @@ set(CPP_HTTPLIB_INCLUDE_DIR "${CPP_HTTPLIB_ROOT}")
 add_executable(FBCross
     src/main.cpp
     src/listener.cpp
+    src/threads.cpp
+    src/database_utils.cpp
     src/connect_pool.cpp
+    src/FBCServer.cpp
 )
 
 # 包含头文件目录

@@ -21,3 +21,11 @@ std::string get_url(const std::string& config_path, int index)
 
     return get_url(config, index);
 }
+
+boost::property_tree::ptree get_config(const std::string& config_path)
+{
+    boost::property_tree::ptree config;
+    boost::property_tree::read_json(config_path, config);
+
+    return config;
+}
