@@ -26,3 +26,9 @@ void Listener::handle_accept(boost::asio::ip::tcp::socket&& socket)
 {
     pool_ -> submit(std::move(socket));
 }
+
+
+void Listener::link_pool(std::shared_ptr<LimPool>&& pool)
+{
+    pool_ = std::move(pool);
+}

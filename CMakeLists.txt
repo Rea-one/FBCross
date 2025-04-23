@@ -22,6 +22,7 @@ add_executable(FBCross
     src/connect_pool.cpp
     src/workers.cpp
     src/server.cpp
+    src/receiver.cpp
 )
 
 # 包含头文件目录

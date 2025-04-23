@@ -1,7 +1,7 @@
 #include "threads.h"
 
 Threads::Threads(size_t thread_count)
-    :stop_(false)
+    : stop_(false)
 {
     for (size_t i = 0; i < thread_count; ++i)
     {
@@ -30,14 +30,19 @@ void Threads::workerThread()
         std::function<void()> task;
         {
             std::unique_lock<std::mutex> lock(mtx_);
+            // 等待任务队列非空或线程需终止
             cv_.wait(lock, [this]
                      { return stop_ || !tasks_.empty(); });
             if (stop_ && tasks_.empty())
-                return;
+            {
+                return; // 线程退出
+            }
             task = std::move(tasks_.front());
             tasks_.pop();
+            tasks_in_progress_++; // 开始执行任务前计数器+1
         }
-        task();
+        task();               // 执行任务
+        tasks_in_progress_--; // 任务完成后计数器-1
     }
 }
 
@@ -56,4 +61,12 @@ auto Threads::submit(Func &&func, Args &&...args) -> std::future<decltype(func(a
     }
     cv_.notify_one();
     return res;
+}
+
+void Threads::wait()
+{
+    std::unique_lock<std::mutex> lock(mtx_);
+    // 等待队列空且无任务在运行
+    cv_.wait(lock, [this]
+             { return tasks_.empty() && tasks_in_progress_ == 0; });
 }

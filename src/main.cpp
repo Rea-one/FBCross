@@ -1,13 +1,11 @@
 #pragma once
 
 
-#include "listener.h"
-#include "database_utils.h"
+#include "server.h"
 
 
 int main()
 {
-    Listener listener("./config/config.json");
-    listener.Run();
-    return 0;
+    Server server("config/config.json");
+    server.start();
 }

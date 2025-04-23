@@ -10,20 +10,70 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#include <pqxx/pqxx>
 
 #include "methods.h"
 
-class ConnectPool
+
+class CONNECT_POOL
+{
+protected:
+    int current_connections_;
+    int connect_limit_;
+    boost::asio::io_context io_context_;
+
+    std::mutex pool_mutex_;
+    std::condition_variable pool_cv_;
+
+    std::queue<boost::asio::ip::tcp::socket> pool_;
+    virtual void init() = 0;
+public:
+    CONNECT_POOL(int connect_limit);
+    boost::asio::io_context& get_io_context();
+    bool submit(boost::asio::ip::tcp::socket&& socket);
+    boost::asio::ip::tcp::socket get();
+    bool is_full();
+    bool is_empty();
+};
+
+class ExpPool: public CONNECT_POOL
 {
 private:
+    std::string ip_;
+    int port_;
+
+    void init() override;
+
+public:
+    ExpPool(int connect_limit, std::string ip, int port);
+};
+
+class LimPool: public CONNECT_POOL
+{
+private:
+    void init() override;
+
+public:
+    LimPool(int connect_limit);
+};
+
+
+class PQPool
+{
+protected:
+    std::string ip_;
+    int port_;
     int current_connections_;
     int connect_limit_;
 
-    std::queue<boost::asio::ip::tcp::socket> pool_;
+    std::mutex pool_mutex_;
+    std::condition_variable pool_cv_;
+
+    std::queue<pqxx::connection> pool_;
 public:
-    ConnectPool(const int& connect_limit);
-    bool submit(boost::asio::ip::tcp::socket&& socket);
-    boost::asio::ip::tcp::socket get();
+    PQPool(int connect_limit, std::string ip, int port);
+    bool submit(pqxx::connection&& conn);
+    pqxx::connection get();
     bool is_full();
     bool is_empty();
 };
