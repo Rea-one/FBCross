@@ -33,7 +33,7 @@ private:
     int work_limit_;
 
     std::shared_ptr<LimPool> fore_pool_{};
-    std::shared_ptr<ExpPool> back_pool_{};
+    std::shared_ptr<PQPool> back_pool_{};
 
     std::unique_ptr<Listener> listener_{};
     std::unique_ptr<Receiver> receivers_{};

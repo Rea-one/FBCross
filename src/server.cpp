@@ -15,7 +15,7 @@ Server::Server(const std::string& config_path)
     
     listener_ = std::make_unique<Listener> (sever_ip_, sever_port_);
     fore_pool_ = std::make_shared<LimPool> (receive_limit_);
-    back_pool_ = std::make_shared<ExpPool> (work_limit_);
+    back_pool_ = std::make_shared<PQPool> (work_limit_);
     receivers_ = std::make_unique<Receiver> (receive_limit_);
     workers_ = std::make_unique<Workers> (work_limit_, database_ip_, database_port_);
     listener_ -> link_pool(std::move(fore_pool_));

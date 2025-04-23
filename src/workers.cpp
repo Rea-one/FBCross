@@ -12,8 +12,51 @@ std::string bkm_handler::get_message()
     return message;
 }
 
-std::string bkm_handler::operation(std::string message, boost::asio::ip::tcp::socket& socket)
+std::string bkm_handler::operation(std::string message, pqxx::connection& conn)
 {
+    std::string sql_mess{};
+    std::string now{};
+    std::unique_ptr<std::string> cursor{};
+    for (auto& elem: message)
+    {
+        if (elem == ' ')
+        {
+            if (cursor != nullptr)
+            {
+                *cursor = now;
+                now.clear();
+                cursor.reset();
+                continue;
+            }
+            if (now == "insert")
+            {
+                task = now;
+                now.clear();
+            }
+            else if (now == "sender")
+            {
+                cursor = std::make_unique<std::string> (sender);
+            }
+            else if (now == "receiver")
+            {
+                cursor = std::make_unique<std::string> (receiver);
+            }
+            else if (now == "message")
+            {
+                cursor = std::make_unique<std::string> (pmessage);
+            }
+        }
+        else
+        {
+            now += elem;
+        }
+    }
+
+    if (task == "insert")
+    {
+        sql_mess = "insert into messages (sender, receiver, message) values ("+ reference(sender) + "," + reference(receiver) + "," + reference(pmessage) + ");";
+    }
+
     
 }
 
@@ -24,10 +67,10 @@ void bkm_handler::put_message(std::string& message)
 }
 
 
-Workers::Workers(const int &worker_limit, ExpPool& pool, IOMesaage& io_mes):
+Workers::Workers(const int &worker_limit, PQPool& pool, IOMesaage& io_mes):
     worker_limit_(worker_limit), current_workers_(0)
 {
-    pool_ = std::make_shared<ExpPool>(pool);
+    pool_ = std::make_shared<PQPool>(pool);
     io_mes_ = std::make_shared<IOMesaage>(io_mes);
 }
 
@@ -35,16 +78,16 @@ void Workers::start()
 {
     while(!pool_ -> is_empty())
     {
-        auto socket = std::move(pool_ -> get());
+        auto conn = std::move(pool_ -> get());
         workers_.submit
-        ([this, &socket] ()
+        ([this, &conn] ()
         {
             bkm_handler handler(io_mes_);
             std::string message;
             while(true)
             {
                 message = handler.get_message();
-                message = handler.operation(message, socket);
+                message = handler.operation(message, conn);
                 handler.put_message(message);
             }
         });

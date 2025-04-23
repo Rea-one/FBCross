@@ -15,17 +15,25 @@
 #include "to_sql.h"
 
 #include "threads.h"
+#include "pqxx/pqxx"
+
 
 class bkm_handler
 {
 public:
     bkm_handler(std::shared_ptr<IOMesaage> io_mes);
     std::string get_message();
-    std::string operation(std::string message, boost::asio::ip::tcp::socket& socket);
+    std::string operation(std::string message, pqxx::connection& conn);
     void put_message(std::string& message);
 private:
     std::shared_ptr<IOMesaage> io_mes_;
     std::string user_ip_;
+
+
+    std::string sender;
+    std::string receiver;
+    std::string pmessage;
+    std::string task;
 };
 
 class Workers
@@ -35,13 +43,13 @@ private:
     int worker_limit_;
     Threads workers_;
 
-    std::shared_ptr<ExpPool> pool_;
+    std::shared_ptr<PQPool> pool_;
     std::shared_ptr<IOMesaage> io_mes_;
 
     Workers() = delete;
 
 public:
-    Workers(const int &worker_limit, ExpPool& pool, IOMesaage& io_mes);
+    Workers(const int &worker_limit, PQPool& pool, IOMesaage& io_mes);
     void start();
     void wait();
 };
