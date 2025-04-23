@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <mutex>
+#include <unordered_map>
 #include <condition_variable>
 
 
@@ -17,6 +18,9 @@ public:
     std::condition_variable Ocond_;
     std::unordered_map<std::string, std::queue<std::string>> Oqueue_;
 
+
+    IOMesaage(const IOMesaage&) = delete;
+    IOMesaage& operator=(const IOMesaage&) = delete;
 
     bool is_empty_I();
     bool is_empty_O();

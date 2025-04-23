@@ -5,24 +5,37 @@ frm_handler::frm_handler(std::shared_ptr<IOMesaage> io_mes):
     io_mes_(io_mes)
 {}
 
-std::string frm_handler::get_message(boost::asio::ip::tcp::socket& socket)
+void frm_handler::get_message(boost::asio::ip::tcp::socket& socket)
 {
-    std::string ip;
-    auto message = io_mes_ -> read_o(ip);
-    if (!message.empty())
+    std::string ip = socket.remote_endpoint().address().to_string();
+    std::string message;
+    try
+    {
+        boost::asio::streambuf buffer;
+        boost::asio::read_until(socket, buffer, '\n');
+        std::istream is(&buffer);
+        std::getline(is, message);
+    }
+    catch(std::exception& e)
     {
         
     }
+    io_mes_ -> write_o(ip, message);
 }
 
-std::string frm_handler::operation(std::string message)
-{
-    
-}
 
-void frm_handler::put_message(std::string& message, boost::asio::ip::tcp::socket& socket)
+
+void frm_handler::put_message(boost::asio::ip::tcp::socket& socket)
 {
-    
+    std::string ip = socket.remote_endpoint().address().to_string();
+    std::string message;
+
+    message = io_mes_ -> read_o(ip);
+
+    if (message != "")
+    {
+        boost::asio::write(socket, boost::asio::buffer(message));
+    }
 }
 
 
@@ -42,12 +55,10 @@ void Receiver::start()
         ([this, &socket] ()
         {
             frm_handler handler(io_mes_);
-            std::string message;
             while(true)
             {
-                message = handler.get_message(socket);
-                message = handler.operation(message);
-                handler.put_message(message, socket);
+                handler.get_message(socket);
+                handler.put_message(socket);
             }
         });
     }

@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-
 #include "threads.h"
 #include "IOmessage.h"
 #include "connect_pool.h"
@@ -12,14 +11,15 @@ class frm_handler
 {
 public:
     frm_handler(std::shared_ptr<IOMesaage> io_mes);
-    std::string get_message(boost::asio::ip::tcp::socket& socket);
-    std::string operation(std::string message);
-    void put_message(std::string& message, boost::asio::ip::tcp::socket& socket);
+    void get_message(boost::asio::ip::tcp::socket &socket);
+    void put_message(boost::asio::ip::tcp::socket &socket);
+
 private:
     std::shared_ptr<IOMesaage> io_mes_;
 };
 
-class Receiver {
+class Receiver
+{
 
 private:
     int receiver_limit_;
@@ -32,7 +32,7 @@ private:
     std::unordered_map<std::string, int> message_index_;
 
 public:
-    Receiver(const int &receiver_limit, CONNECT_POOL& pool, IOMesaage& io_mes);
+    Receiver(const int &receiver_limit, CONNECT_POOL &pool, IOMesaage &io_mes);
     void start();
     void wait();
 };

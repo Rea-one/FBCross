@@ -54,10 +54,16 @@ std::string bkm_handler::operation(std::string message, pqxx::connection& conn)
 
     if (task == "insert")
     {
-        sql_mess = "insert into messages (sender, receiver, message) values ("+ reference(sender) + "," + reference(receiver) + "," + reference(pmessage) + ");";
+        sql_mess = "insert into messages (sender, receiver, message) values ("
+            + reference(sender) + ","
+            + reference(receiver) + ","
+            + reference(pmessage) + ");";
     }
 
-    
+    pqxx::work txn(conn); // 创建事务
+    txn.exec(sql_mess);   // 执行SQL
+    txn.commit();         // 提交事务
+    return "Success: Inserted into database.";
 }
 
 void bkm_handler::put_message(std::string& message)

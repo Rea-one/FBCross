@@ -71,6 +71,8 @@ protected:
 
     std::queue<pqxx::connection> pool_;
 public:
+    PQPool(const PQPool&) = delete;
+    PQPool& operator=(const PQPool&) = delete;
     PQPool(int connect_limit, std::string ip, int port);
     bool submit(pqxx::connection&& conn);
     pqxx::connection get();
