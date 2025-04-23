@@ -1,13 +1,13 @@
-#include "IOmessage.h"
+#include "IOMessage.h"
 
-bool IOmessage::is_empty_I()
+bool IOMessage::is_empty_I()
 {
     std::lock_guard<std::mutex> lock(Imutex_);
     return Iqueue_.empty();
 }
 
 
-bool IOmessage::is_empty_O()
+bool IOMessage::is_empty_O()
 {
     std::lock_guard<std::mutex> lock(Omutex_);
     return Oqueue_.empty();
@@ -20,14 +20,14 @@ void IOMessage::write_o(std::string& ip, std::string& message)
     Ocond_.notify_one();
 }
 
-void IOmessage::write_i(std::string& message)
+void IOMessage::write_i(std::string& ip, std::string& message)
 {
     std::lock_guard<std::mutex> lock(Imutex_);
-    Iqueue_.push(message);
+    Iqueue_.push({ip, message});
     Icond_.notify_one();
 }
 
-std::string IOmessage::read_o(std::string& ip)
+std::string IOMessage::read_o(std::string& ip)
 {
     std::unique_lock<std::mutex> lock(Omutex_);
     Ocond_.wait(lock, [this, &ip] { return !Oqueue_[ip].empty(); });
@@ -36,7 +36,7 @@ std::string IOmessage::read_o(std::string& ip)
     return message;
 }
 
-std::pair<std::string, std::string> IOmessage::read_i()
+std::pair<std::string, std::string> IOMessage::read_i()
 {
     std::unique_lock<std::mutex> lock(Imutex_);
     Icond_.wait(lock, [this] { return !Iqueue_.empty(); });

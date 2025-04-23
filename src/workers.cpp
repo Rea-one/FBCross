@@ -1,7 +1,7 @@
 #include "workers.h"
 
 
-bkm_handler::bkm_handler(std::shared_ptr<IOMesaage> io_mes):
+bkm_handler::bkm_handler(std::shared_ptr<IOMessage> io_mes):
     io_mes_(io_mes)
 {}
 
@@ -73,12 +73,10 @@ void bkm_handler::put_message(std::string& message)
 }
 
 
-Workers::Workers(const int &worker_limit, PQPool& pool, IOMesaage& io_mes):
-    worker_limit_(worker_limit), current_workers_(0)
-{
-    pool_ = std::make_shared<PQPool>(pool);
-    io_mes_ = std::make_shared<IOMesaage>(io_mes);
-}
+Workers::Workers(const int &worker_limit, std::shared_ptr<PQPool> pool, std::shared_ptr<IOMessage> io_mes):
+    worker_limit_(worker_limit), current_workers_(0),
+    pool_(pool), io_mes_(io_mes)
+{}
 
 void Workers::start()
 {

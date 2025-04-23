@@ -1,7 +1,7 @@
 #include "receiver.h"
 
 
-frm_handler::frm_handler(std::shared_ptr<IOMesaage> io_mes):
+frm_handler::frm_handler(std::shared_ptr<IOMessage> io_mes):
     io_mes_(io_mes)
 {}
 
@@ -39,12 +39,10 @@ void frm_handler::put_message(boost::asio::ip::tcp::socket& socket)
 }
 
 
-Receiver::Receiver(const int &receiver_limit, CONNECT_POOL& pool, IOMesaage& io_mes):
-    receiver_limit_(receiver_limit), queues_(receiver_limit_)
-{
-    pool_ = std::make_shared<LimPool>(io_mes);
-    io_mes_ = std::make_shared<IOMesaage>(io_mes);
-}
+Receiver::Receiver(const int &receiver_limit, std::shared_ptr<LimPool> pool, std::shared_ptr<IOMessage> io_mes):
+    receiver_limit_(receiver_limit), queues_(receiver_limit_),
+    pool_(pool), io_mes_(io_mes)
+{}
 
 void Receiver::start()
 {

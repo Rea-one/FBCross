@@ -6,13 +6,12 @@
 #include <boost/property_tree/ptree.hpp>
 
 
-#include "httplib.h"
-
 
 #include "methods.h"
 #include "threads.h"
 
 #include "connect_pool.h"
+#include "IOmessage.h"
 #include "listener.h"
 #include "receiver.h"
 #include "workers.h"
@@ -34,6 +33,7 @@ private:
 
     std::shared_ptr<LimPool> fore_pool_{};
     std::shared_ptr<PQPool> back_pool_{};
+    std::shared_ptr<IOMessage> io_mes_{};
 
     std::unique_ptr<Listener> listener_{};
     std::unique_ptr<Receiver> receivers_{};

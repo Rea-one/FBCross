@@ -1,7 +1,8 @@
 #include "connect_pool.h"
 
 CONNECT_POOL::CONNECT_POOL(int connect_limit):
-    connect_limit_(connect_limit)
+    connect_limit_(connect_limit),
+    current_connections_(0)
 {}
 boost::asio::io_context& CONNECT_POOL::get_io_context() { return io_context_; };
 
@@ -63,7 +64,10 @@ LimPool::LimPool(int connect_limit):
 
 
 PQPool::PQPool(int connect_limit, std::string ip, int port):
-    connect_limit_(connect_limit), ip_(ip), port_(port)
+    current_connections_(0),  // 初始化连接计数器
+    connect_limit_(connect_limit),
+    ip_(ip),
+    port_(port)
 {
     for (int order = 0; order < connect_limit_; order++)
     {

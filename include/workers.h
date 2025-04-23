@@ -21,12 +21,12 @@
 class bkm_handler
 {
 public:
-    bkm_handler(std::shared_ptr<IOMesaage> io_mes);
+    bkm_handler(std::shared_ptr<IOMessage> io_mes);
     std::string get_message();
     std::string operation(std::string message, pqxx::connection& conn);
     void put_message(std::string& message);
 private:
-    std::shared_ptr<IOMesaage> io_mes_;
+    std::shared_ptr<IOMessage> io_mes_;
     std::string user_ip_;
 
 
@@ -44,12 +44,12 @@ private:
     Threads workers_;
 
     std::shared_ptr<PQPool> pool_;
-    std::shared_ptr<IOMesaage> io_mes_;
+    std::shared_ptr<IOMessage> io_mes_;
 
     Workers() = delete;
 
 public:
-    Workers(const int &worker_limit, PQPool& pool, IOMesaage& io_mes);
+    Workers(const int &worker_limit, std::shared_ptr<PQPool> pool, std::shared_ptr<IOMessage> io_mes);
     void start();
     void wait();
 };

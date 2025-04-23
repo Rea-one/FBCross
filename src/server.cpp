@@ -13,12 +13,13 @@ Server::Server(const std::string& config_path)
     work_limit_ = config_.get<int>("server.work_limit");
 
     
-    listener_ = std::make_unique<Listener> (sever_ip_, sever_port_);
+
     fore_pool_ = std::make_shared<LimPool> (receive_limit_);
-    back_pool_ = std::make_shared<PQPool> (work_limit_);
-    receivers_ = std::make_unique<Receiver> (receive_limit_);
-    workers_ = std::make_unique<Workers> (work_limit_, database_ip_, database_port_);
-    listener_ -> link_pool(std::move(fore_pool_));
+    back_pool_ = std::make_shared<PQPool> (work_limit_, database_ip_, database_port_);
+    io_mes_ = std::make_shared<IOMessage> ();
+    listener_ = std::make_unique<Listener> (sever_ip_, sever_port_);
+    receivers_ = std::make_unique<Receiver> (receive_limit_, fore_pool_, io_mes_);
+    workers_ = std::make_unique<Workers> (work_limit_, back_pool_, io_mes_);
 }
 
 

@@ -10,12 +10,12 @@
 class frm_handler
 {
 public:
-    frm_handler(std::shared_ptr<IOMesaage> io_mes);
+    frm_handler(std::shared_ptr<IOMessage> io_mes);
     void get_message(boost::asio::ip::tcp::socket &socket);
     void put_message(boost::asio::ip::tcp::socket &socket);
 
 private:
-    std::shared_ptr<IOMesaage> io_mes_;
+    std::shared_ptr<IOMessage> io_mes_;
 };
 
 class Receiver
@@ -27,12 +27,12 @@ private:
     Threads receivers_;
 
     std::shared_ptr<LimPool> pool_;
-    std::shared_ptr<IOMesaage> io_mes_;
+    std::shared_ptr<IOMessage> io_mes_;
     std::vector<std::queue<std::string>> queues_;
     std::unordered_map<std::string, int> message_index_;
 
 public:
-    Receiver(const int &receiver_limit, CONNECT_POOL &pool, IOMesaage &io_mes);
+    Receiver(const int &receiver_limit, std::shared_ptr<LimPool> pool, std::shared_ptr<IOMessage> io_mes);
     void start();
     void wait();
 };
