@@ -26,7 +26,6 @@ protected:
     std::condition_variable pool_cv_;
 
     std::queue<boost::asio::ip::tcp::socket> pool_;
-    virtual void init() = 0;
 public:
     CONNECT_POOL(int connect_limit);
     boost::asio::io_context& get_io_context();
@@ -42,8 +41,6 @@ private:
     std::string ip_;
     int port_;
 
-    void init() override;
-
 public:
     ExpPool(int connect_limit, std::string ip, int port);
 };
@@ -51,7 +48,6 @@ public:
 class LimPool: public CONNECT_POOL
 {
 private:
-    void init() override;
 
 public:
     LimPool(int connect_limit);

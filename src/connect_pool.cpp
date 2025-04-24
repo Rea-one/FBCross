@@ -95,7 +95,13 @@ pqxx::connection PQPool::get()
         pqxx::connection conn(ip_ + ":" + std::to_string(port_) + "/" + std::to_string(current_connections_));
         return conn;
     }
-    auto conn = std::move(pool_.front());
+    else
+    {
+        auto conn = std::move(pool_.front());
+        pool_.pop();
+        current_connections_--;
+        return conn;
+    }
 }
 
 bool PQPool::is_full()
