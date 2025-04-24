@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.20)
 project(FBCross LANGUAGES CXX)
 
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0601)
+endif()
+
 cmake_policy(SET CMP0144 NEW)    # 启用 BOOST_ROOT 变量
 cmake_policy(SET CMP0167 NEW)    # 使用新版 Boost 查找逻辑
 
@@ -45,9 +53,15 @@ target_link_libraries(FBCross PRIVATE
     pqxx
     OpenSSL::SSL
     OpenSSL::Crypto
-    intl                 # gettext 的 intl 库
+    
     iconv                # iconv 库（可能需要）
 )
+
+if (UNIX)
+    target_link_libraries(FBCross PRIVATE
+        intl                 # gettext 的 intl 库
+    )
+endif()
 
 if (WIN32)
     target_compile_definitions(FBCross PRIVATE _WIN32)
