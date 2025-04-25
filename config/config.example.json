@@ -1,9 +1,13 @@
 {
   "path": {
-    "libpqXX": "",
-    "postgresql": "",
-    "boost": "",
-    "cpp-httplib": ""
+    "GNU": {
+      "PostgreSQL": "",
+      "cpp-httplib": ""
+    },
+    "MSVC": {
+      "PostgreSQL": "",
+      "cpp-httplib": ""
+    }
   },
   "database": {
     "postgresql": {
@@ -17,7 +21,7 @@
   "server": {
     "ip": "",
     "port": 0,
-    "connection_limit": 4,
-    "worker_limit": 4
+    "receive_limit": 0,
+    "work_limit": 0
   }
 }

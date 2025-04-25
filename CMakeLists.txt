@@ -10,28 +10,35 @@ if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0601)
 endif()
 
-cmake_policy(SET CMP0144 NEW)    # 启用 BOOST_ROOT 变量
+
+# cmake_policy(SET CMP0144 NEW)    # 启用 BOOST_ROOT 变量
 cmake_policy(SET CMP0167 NEW)    # 使用新版 Boost 查找逻辑
 
 
-add_subdirectory("packs/src/libpqxx" "packs/build/libpqxx")
+
+# include(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake)
+
+add_subdirectory("packs/src/libpqxx" "packs/libpqxx")
 
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake)
-
-# list(PREPEND CMAKE_PREFIX_PATH ${POSTGRESQL_ROOT}/bin
-#     ${POSTGRESQL_ROOT}/lib
-#     ${POSTGRESQL_ROOT}/include
-# )
-
-
-find_package(Boost REQUIRED COMPONENTS 
+find_package(Boost REQUIRED COMPONENTS
     system          # 必须包含
     thread          # 若使用多线程功能
 )
-find_package(PostgreSQL REQUIRED)
-find_package(OpenSSL REQUIRED)
 
+# if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+#     find_package(PostgreSQL REQUIRED
+#         PATHS ${PostgreSQL_DIR}  # 强制指定用户设置的路径
+#         NO_DEFAULT_PATH
+#     )
+# else ()
+#     find_package(PostgreSQL REQUIRED)
+# endif()
+
+
+find_package(PostgreSQL REQUIRED)
+
+find_package(OpenSSL REQUIRED)
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
 
 # 添加可执行文件（包含所有源文件）
@@ -53,8 +60,8 @@ target_link_libraries(FBCross PRIVATE
     pqxx
     OpenSSL::SSL
     OpenSSL::Crypto
-    
-    iconv                # iconv 库（可能需要）
+    # gettext
+    # iconv                # iconv 库（可能需要）
 )
 
 if (UNIX)

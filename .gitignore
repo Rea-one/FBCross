@@ -3,3 +3,5 @@ build
 config/config.json
 config.cmake
 packs
+Taskfile.yml
+.vs
