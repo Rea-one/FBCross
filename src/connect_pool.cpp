@@ -92,7 +92,7 @@ pqxx::connection PQPool::get()
     std::unique_lock<std::mutex> lock(pool_mutex_);
     if (pool_.empty())
     {
-        pqxx::connection conn(ip_ + ":" + std::to_string(port_) + "/" + std::to_string(current_connections_));
+        pqxx::connection conn("host=" + ip_ + " port=" + std::to_string(port_) + " dbname=mydb user=myuser password=mypass");
         return conn;
     }
     else
