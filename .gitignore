@@ -5,3 +5,4 @@ config.cmake
 packs
 Taskfile.yml
 .vs
+CMakeLists.txt
