@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include <string>
 #include <utility>
@@ -23,10 +24,13 @@ private:
     bool stop_ = false;
     std::mutex mutex_;
     std::condition_variable cv_;
-    std::string sever_ip_;
-    int sever_port_;
+    std::string server_ip_;
+    int server_port_;
     std::string database_ip_;
     int database_port_;
+    std::string database_name_;
+    std::string database_user_;
+    std::string database_password_;
 
     int receive_limit_;
     int work_limit_;

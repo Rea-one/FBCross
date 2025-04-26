@@ -77,25 +77,37 @@ void bkm_handler::put_message(std::string &message)
 }
 
 Workers::Workers(const int &worker_limit, std::shared_ptr<PQPool> pool, std::shared_ptr<IOMessage> io_mes) : worker_limit_(worker_limit),
-    current_workers_(0), pool_(pool), io_mes_(io_mes)
+    current_workers_(0), pool_(std::move(pool)), io_mes_(std::move(io_mes))
 {
 }
 
 void Workers::start()
 {
+    int count = 0;
     while (!pool_->is_empty())
     {
-        auto conn = std::move(pool_->get());
-        workers_.submit([this, &conn]()
-                        {
-            bkm_handler handler(io_mes_);
-            std::string message;
-            while(true)
-            {
-                message = handler.get_message();
-                message = handler.operation(message, conn);
-                handler.put_message(message);
-            } });
+        std::cout << count << std::endl;
+        count ++;
+        try
+        {
+            auto conn = std::move(pool_->get());
+            workers_.submit([this, &conn]()
+                            {
+                bkm_handler handler(io_mes_);
+                std::string message;
+                while(true)
+                {
+                    message = handler.get_message();
+                    message = handler.operation(message, conn);
+                    handler.put_message(message);
+                } });
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+            break;
+        }
+        
     }
 }
 

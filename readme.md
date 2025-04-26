@@ -18,10 +18,13 @@ cmake添加add_subdirectory("packs/src/libpqxx" "这里是build目录中libpqxx�
 ### GNU系列编译器
 
 推荐msys2
-Boost直接用msys2安装
-安装PostgreSQL需要的库，然后源码安装
+Boost和PostgreSQL都用msys2安装
 
 ### MSVC
 
-Boost按照官方文档默认安装就行
-PostgreSQL直接用安装包安装
+至于MSVC，我只能祝它好运
+
+
+## 注意项
+
+CMakeLists.txt目前暂不提供，由于在ubuntu和windows中都在尝试构建此项目，追踪过于繁琐，目前暂不提供，且目前项目存在海量问题

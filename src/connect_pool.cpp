@@ -63,16 +63,23 @@ LimPool::LimPool(int connect_limit):
 }
 
 
-PQPool::PQPool(int connect_limit, std::string ip, int port):
+PQPool::PQPool(int connect_limit, std::string ip, int port,
+    std::string dbname, std::string user, std::string password):
     current_connections_(0),  // 初始化连接计数器
-    connect_limit_(connect_limit),
-    ip_(ip),
-    port_(port)
+    connect_limit_(connect_limit), ip_(ip), port_(port),
+    dbname_(dbname), user_(user), password_(password)
 {
+    std::string conn_str =
+        "host=" + ip_ +
+        " port=" + std::to_string(port_) +
+        " dbname=" + dbname_ +
+        " user=" + user_ +
+        " password=" + password_;
     for (int order = 0; order < connect_limit_; order++)
     {
-        pqxx::connection conn(ip_ + ":" + std::to_string(port_) + "/" + std::to_string(order));
+        pqxx::connection conn(conn_str);
         pool_.emplace(std::move(conn));
+        current_connections_ ++;
     }
 }
 
@@ -82,7 +89,7 @@ bool PQPool::submit(pqxx::connection &&conn)
     if (current_connections_ >= connect_limit_)
         return false;
     pool_.emplace(std::move(conn));
-    current_connections_++;
+    current_connections_ ++;
     pool_cv_.notify_one();
     return true;
 }
@@ -92,7 +99,16 @@ pqxx::connection PQPool::get()
     std::unique_lock<std::mutex> lock(pool_mutex_);
     if (pool_.empty())
     {
-        pqxx::connection conn("host=" + ip_ + " port=" + std::to_string(port_) + " dbname=mydb user=myuser password=mypass");
+        if (current_connections_ >= connect_limit_)
+        {
+            throw std::runtime_error("连接池满了，不允许再请求连接");
+        }
+        pqxx::connection conn("host=" + ip_ + 
+            " port=" + std::to_string(port_) +
+            " dbname=" + dbname_ +
+            " user=" + user_ +
+            " password=" + password_);
+        current_connections_ ++;
         return conn;
     }
     else
@@ -106,10 +122,31 @@ pqxx::connection PQPool::get()
 
 bool PQPool::is_full()
 {
+    std::unique_lock<std::mutex> lock(pool_mutex_);
     return current_connections_ >= connect_limit_;
 }
 
 bool PQPool::is_empty()
 {
+    std::unique_lock<std::mutex> lock(pool_mutex_);
     return pool_.empty();
+}
+
+
+
+bool PQPool::over_size()
+{
+    std::unique_lock<std::mutex> lock(pool_mutex_);
+    return current_connections_ > connect_limit_;
+}
+
+bool PQPool::float_size()
+{
+    std::unique_lock<std::mutex> lock(pool_mutex_);
+    return current_connections_ >= connect_limit_;
+}
+
+std::unique_lock<std::mutex> PQPool::pool_lock()
+{
+    return std::move(std::unique_lock<std::mutex>(pool_mutex_));
 }

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <thread>
 #include <mutex>
 #include <condition_variable>
 
@@ -56,9 +57,14 @@ public:
 
 class PQPool
 {
-protected:
+    
+private:
     std::string ip_;
     int port_;
+    std::string dbname_;
+    std::string user_;
+    std::string password_;
+
     int current_connections_;
     int connect_limit_;
 
@@ -67,9 +73,14 @@ protected:
 
     std::queue<pqxx::connection> pool_;
 public:
-    PQPool(int connect_limit, std::string ip, int port);
+    PQPool(int connect_limit, std::string ip, int port,
+        std::string dbname, std::string user, std::string password);
     bool submit(pqxx::connection&& conn);
     pqxx::connection get();
     bool is_full();
     bool is_empty();
+    bool over_size();
+    bool float_size();
+
+    std::unique_lock<std::mutex> pool_lock();
 };
