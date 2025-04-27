@@ -2,6 +2,7 @@
 
 
 #include <iostream>
+#include <list>
 #include <vector>
 #include <string>
 #include <thread>
@@ -10,13 +11,14 @@
 
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #include "connect_pool.h"
 #include "IOmessage.h"
 
 #include "to_sql.h"
 
-#include "threads.h"
+#include "worker.h"
 #include "pqxx/pqxx"
 
 
@@ -43,7 +45,7 @@ class Workers
 private:
     int current_workers_;
     int worker_limit_;
-    Threads workers_;
+    std::list<std::shared_ptr<Worker>> workers_;
 
     std::shared_ptr<PQPool> pool_;
     std::shared_ptr<IOMessage> io_mes_;

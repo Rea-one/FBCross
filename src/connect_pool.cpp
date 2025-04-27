@@ -130,6 +130,7 @@ bool PQPool::is_empty()
 {
     std::unique_lock<std::mutex> lock(pool_mutex_);
     return pool_.empty();
+    lock.unlock();
 }
 
 
@@ -146,7 +147,12 @@ bool PQPool::float_size()
     return current_connections_ >= connect_limit_;
 }
 
-std::unique_lock<std::mutex> PQPool::pool_lock()
+std::mutex& PQPool::pool_lock()
 {
-    return std::move(std::unique_lock<std::mutex>(pool_mutex_));
+    return pool_mutex_;
+}
+
+std::condition_variable& PQPool::pool_cv()
+{
+    return pool_cv_;
 }

@@ -82,5 +82,6 @@ public:
     bool over_size();
     bool float_size();
 
-    std::unique_lock<std::mutex> pool_lock();
+    std::mutex& pool_lock();
+    std::condition_variable& pool_cv();
 };

@@ -23,6 +23,12 @@ public:
     ~Threads();
 
     void wait();
+
+    bool is_empty();
+    bool is_full();
+    bool over_size();
+    bool float_size();
+
     template <typename Func, typename... Args>
     auto submit(Func &&func, Args &&...args) -> std::future<decltype(func(args...))>
     {

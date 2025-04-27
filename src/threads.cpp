@@ -53,3 +53,10 @@ void Threads::wait()
     cv_.wait(lock, [this]
              { return tasks_.empty() && tasks_in_progress_ == 0; });
 }
+
+
+bool Threads::is_empty()
+{
+    std::unique_lock<std::mutex> lock(mtx_);
+    return tasks_.empty();
+}
