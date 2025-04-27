@@ -19,9 +19,8 @@ Server::Server(const std::string& config_path)
     fore_pool_ = std::make_shared<LimPool> (receive_limit_);
     back_pool_ = std::make_shared<PQPool> (work_limit_, database_ip_, database_port_,
         database_name_, database_user_, database_password_);
-    io_mes_ = std::make_shared<IOMessage> ();
     listener_ = std::make_unique<Listener> (server_ip_, server_port_);
-    receivers_ = std::make_unique<Receiver> (receive_limit_, fore_pool_, io_mes_);
+    receivers_ = std::make_unique<Receivers> (receive_limit_, fore_pool_, io_mes_);
     workers_ = std::make_unique<Workers> (work_limit_, back_pool_, io_mes_);
 }
 

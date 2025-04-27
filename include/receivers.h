@@ -2,10 +2,14 @@
 
 #include <string>
 #include <vector>
+#include <queue>
+
+#include <boost/asio.hpp>
 
 #include "threads.h"
 #include "IOmessage.h"
 #include "connect_pool.h"
+#include "mess_passer.h"
 
 class frm_handler
 {
@@ -18,21 +22,21 @@ private:
     std::shared_ptr<IOMessage> io_mes_;
 };
 
-class Receiver
+
+using io_type = std::unordered_map<std::string, std::shared_ptr<IOMessage>>;
+
+class Receivers
 {
-
 private:
-    int receiver_limit_;
-
-    Threads receivers_;
+    int current_passer_;
+    int passer_limit_;
+    std::priority_queue<std::shared_ptr<MessPasser>> passers_;
 
     std::shared_ptr<LimPool> pool_;
-    std::shared_ptr<IOMessage> io_mes_;
-    std::vector<std::queue<std::string>> queues_;
-    std::unordered_map<std::string, int> message_index_;
+    std::shared_ptr<io_type> io_mes_;
+
 
 public:
-    Receiver(const int &receiver_limit, std::shared_ptr<LimPool> pool, std::shared_ptr<IOMessage> io_mes);
+    Receivers(const int &worker_limit, std::shared_ptr<LimPool> pool, std::shared_ptr<io_type> io_mes);
     void start();
-    void wait();
 };

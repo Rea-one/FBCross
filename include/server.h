@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <unordered_map>
 #include <boost/property_tree/ptree.hpp>
 
 
@@ -14,7 +15,7 @@
 #include "connect_pool.h"
 #include "IOmessage.h"
 #include "listener.h"
-#include "receiver.h"
+#include "receivers.h"
 #include "workers.h"
 
 
@@ -37,10 +38,10 @@ private:
 
     std::shared_ptr<LimPool> fore_pool_{};
     std::shared_ptr<PQPool> back_pool_{};
-    std::shared_ptr<IOMessage> io_mes_{};
+    std::unordered_map<std::string, std::shared_ptr<IOMessage>> io_mes_{};
 
     std::unique_ptr<Listener> listener_{};
-    std::unique_ptr<Receiver> receivers_{};
+    std::unique_ptr<Receivers> receivers_{};
     std::unique_ptr<Workers> workers_{};
     boost::property_tree::ptree config_;
 

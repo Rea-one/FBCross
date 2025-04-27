@@ -2,45 +2,65 @@
 
 bool IOMessage::is_empty_I()
 {
-    std::lock_guard<std::mutex> lock(Imutex_);
+    std::shared_lock<std::shared_mutex> lock(Imutex_);
     return Iqueue_.empty();
 }
 
 
 bool IOMessage::is_empty_O()
 {
-    std::lock_guard<std::mutex> lock(Omutex_);
+    std::shared_lock<std::shared_mutex> lock(Omutex_);
     return Oqueue_.empty();
 }
 
-void IOMessage::write_o(std::string& ip, std::string& message)
+void IOMessage::write_o(std::string& message)
 {
-    std::lock_guard<std::mutex> lock(Omutex_);
-    Oqueue_[ip].push(message);
+    std::unique_lock<std::shared_mutex> lock(Omutex_);
+    Oqueue_.push(message);
     Ocond_.notify_one();
 }
 
-void IOMessage::write_i(std::string& ip, std::string& message)
+void IOMessage::write_i(std::string& message)
 {
-    std::lock_guard<std::mutex> lock(Imutex_);
-    Iqueue_.push({ip, message});
+    std::unique_lock<std::shared_mutex> lock(Imutex_);
+    Iqueue_.push(message);
     Icond_.notify_one();
 }
 
-std::string IOMessage::read_o(std::string& ip)
+std::string IOMessage::read_o()
 {
-    std::unique_lock<std::mutex> lock(Omutex_);
-    Ocond_.wait(lock, [this, &ip] { return !Oqueue_[ip].empty(); });
-    std::string message = Oqueue_[ip].front();
-    Oqueue_[ip].pop();
+    std::shared_lock<std::shared_mutex> lock(Omutex_);
+    Ocond_.wait(lock, [this] { return !Oqueue_.empty(); });
+    std::string message = Oqueue_.front();
+    Oqueue_.pop();
     return message;
 }
 
-std::pair<std::string, std::string> IOMessage::read_i()
+std::string IOMessage::read_i()
 {
-    std::unique_lock<std::mutex> lock(Imutex_);
+    std::unique_lock<std::shared_mutex> lock(Imutex_);
     Icond_.wait(lock, [this] { return !Iqueue_.empty(); });
-    std::pair<std::string, std::string> message = Iqueue_.front();
+    std::string message = Iqueue_.front();
     Iqueue_.pop();
     return message;
+}
+
+std::shared_mutex& IOMessage::in_lock()
+{
+    return Imutex_;
+}
+
+std::shared_mutex& IOMessage::out_lock()
+{
+    return Omutex_;
+}
+
+std::condition_variable_any& IOMessage::in_cond()
+{
+    return Icond_;
+}
+
+std::condition_variable_any& IOMessage::out_cond()
+{
+    return Ocond_;
 }
