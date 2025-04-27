@@ -80,7 +80,7 @@ using io_type = std::unordered_map<std::string, std::shared_ptr<IOMessage>>;
 
 Workers::Workers(const int &worker_limit, std::shared_ptr<PQPool> pool, std::shared_ptr<io_type> io_mes):
     worker_limit_(worker_limit), current_workers_(0),
-    pool_(std::move(pool)), io_mes_(std::make_shared<io_type>(io_mes))
+    pool_(std::move(pool)), io_mes_(io_mes)
 {
 }
 
@@ -101,7 +101,7 @@ void Workers::start()
             {
                 auto conn = std::move(pool_->get());
                 auto target = std::make_shared<Worker>();
-                target -> link(std::make_unique<pqxx::connection> (conn));
+                target -> link(std::make_unique<pqxx::connection> (std::move(conn)));
                 target -> start();
                 workers_.push(target);
                 current_workers_ ++;

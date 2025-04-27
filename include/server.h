@@ -18,7 +18,7 @@
 #include "receivers.h"
 #include "workers.h"
 
-
+using io_type = std::unordered_map<std::string, std::shared_ptr<IOMessage>>;
 class Server
 {
 private:
@@ -38,7 +38,7 @@ private:
 
     std::shared_ptr<LimPool> fore_pool_{};
     std::shared_ptr<PQPool> back_pool_{};
-    std::unordered_map<std::string, std::shared_ptr<IOMessage>> io_mes_{};
+    std::shared_ptr<io_type> io_mes_{};
 
     std::unique_ptr<Listener> listener_{};
     std::unique_ptr<Receivers> receivers_{};

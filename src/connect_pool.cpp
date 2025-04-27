@@ -80,6 +80,7 @@ PQPool::PQPool(int connect_limit, std::string ip, int port,
         pqxx::connection conn(conn_str);
         pool_.emplace(std::move(conn));
         current_connections_ ++;
+        std::cout << "成功创建第" << current_connections_ << "个链接" << std::endl;
     }
 }
 
@@ -130,7 +131,6 @@ bool PQPool::is_empty()
 {
     std::unique_lock<std::mutex> lock(pool_mutex_);
     return pool_.empty();
-    lock.unlock();
 }
 
 

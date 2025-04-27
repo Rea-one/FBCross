@@ -52,7 +52,7 @@ void Receivers::start()
             auto socket = pool_ -> get();
             auto target = std::make_shared<MessPasser>();
             auto ip = socket.remote_endpoint().address().to_string();
-            target -> link(std::move(std::make_shared<boost::asio::ip::tcp::socket>(socket)));
+            target -> link(std::move(std::make_shared<boost::asio::ip::tcp::socket>(std::move(socket))));
             target -> mlink(std::move(io_mes_ -> find(ip) -> second));
             target -> start();
             passers_.push(target);

@@ -1,6 +1,9 @@
 #include "server.h"
 
 
+using io_type = std::unordered_map<std::string, std::shared_ptr<IOMessage>>;
+
+
 Server::Server(const std::string& config_path)
 {
     config_ = std::move(get_config(config_path));
@@ -16,6 +19,7 @@ Server::Server(const std::string& config_path)
     work_limit_ = config_.get<int>("server.work_limit");
 
 
+    io_mes_ = std::make_shared<io_type>();
     fore_pool_ = std::make_shared<LimPool> (receive_limit_);
     back_pool_ = std::make_shared<PQPool> (work_limit_, database_ip_, database_port_,
         database_name_, database_user_, database_password_);
