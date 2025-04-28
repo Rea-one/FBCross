@@ -9,7 +9,6 @@ boost::asio::io_context& CONNECT_POOL::get_io_context() { return io_context_; };
 
 bool CONNECT_POOL::submit(boost::asio::ip::tcp::socket &&socket)
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     if (current_connections_ >= connect_limit_)
         return false;
     pool_.emplace(std::move(socket));
@@ -20,7 +19,6 @@ bool CONNECT_POOL::submit(boost::asio::ip::tcp::socket &&socket)
 
 boost::asio::ip::tcp::socket CONNECT_POOL::get()
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     if (pool_.empty())
     {
         boost::asio::ip::tcp::endpoint endpoint(
@@ -65,6 +63,7 @@ LimPool::LimPool(int connect_limit):
 
 PQPool::PQPool(int connect_limit, std::string ip, int port,
     std::string dbname, std::string user, std::string password):
+    pool_mutex_(), pool_cv_(),
     current_connections_(0),  // 初始化连接计数器
     connect_limit_(connect_limit), ip_(ip), port_(port),
     dbname_(dbname), user_(user), password_(password)
@@ -86,7 +85,6 @@ PQPool::PQPool(int connect_limit, std::string ip, int port,
 
 bool PQPool::submit(pqxx::connection &&conn)
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     if (current_connections_ >= connect_limit_)
         return false;
     pool_.emplace(std::move(conn));
@@ -97,7 +95,6 @@ bool PQPool::submit(pqxx::connection &&conn)
 
 pqxx::connection PQPool::get()
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     if (pool_.empty())
     {
         if (current_connections_ >= connect_limit_)
@@ -123,13 +120,11 @@ pqxx::connection PQPool::get()
 
 bool PQPool::is_full()
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     return current_connections_ >= connect_limit_;
 }
 
 bool PQPool::is_empty()
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     return pool_.empty();
 }
 
@@ -137,13 +132,11 @@ bool PQPool::is_empty()
 
 bool PQPool::over_size()
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     return current_connections_ > connect_limit_;
 }
 
 bool PQPool::float_size()
 {
-    std::unique_lock<std::mutex> lock(pool_mutex_);
     return current_connections_ >= connect_limit_;
 }
 

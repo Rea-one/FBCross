@@ -4,6 +4,6 @@
 
 int main()
 {
-    Server server("config/config.json");
+    Server server("config.json");
     server.start();
 }

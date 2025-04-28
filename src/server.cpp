@@ -36,13 +36,13 @@ void Server::start()
     workers_ -> start();
     std::cerr << "Workers 已启动" << std::endl;
 
-    receivers_ -> start();
-    std::cerr << "Receivers 已启动" << std::endl;
+    // receivers_ -> start();
+    // std::cerr << "Receivers 已启动" << std::endl;
 
-    listener_ -> start();
-    std::cerr << "Listener 已启动" << std::endl;
-    while (true)
-    {
-        boost::this_thread::sleep_for(boost::chrono::seconds(1));
-    }
+    // listener_ -> start();
+    // std::cerr << "Listener 已启动" << std::endl;
+    // while (true)
+    // {
+    //     boost::this_thread::sleep_for(boost::chrono::seconds(1));
+    // }
 }

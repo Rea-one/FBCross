@@ -1,4 +1,5 @@
 build
+.cache
 .vscode
 config/config.json
 config.cmake

@@ -1,15 +1,12 @@
 #pragma once
 
-#include <utility>
 #include <mutex>
 #include <shared_mutex>
 #include <queue>
-#include <list>
 
 
-#include "boost/asio.hpp"
-#include "boost/thread.hpp"
-
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 #include "pqxx/pqxx"
 
 #include "to_sql.h"

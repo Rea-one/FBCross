@@ -10,7 +10,7 @@ void MessPasser::start()
             active_ = true;
             if (!socket_)
                 cv_.wait(lock);
-            if (socket && io_message_)
+            if (socket_ && io_message_)
             {
                 if (io_message_->is_empty_I())
                     cv_.wait(lock);
@@ -40,7 +40,7 @@ bool MessPasser::link(std::shared_ptr<boost::asio::ip::tcp::socket>&& socket)
     else
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        socket_ = std::move(socket_);
+        socket_ = std::move(socket);
         cv_.notify_one();
         return true;
     }

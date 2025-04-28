@@ -6,6 +6,8 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <atomic>
+#include <shared_mutex>
 #include <condition_variable>
 
 #include <boost/property_tree/json_parser.hpp>
@@ -35,6 +37,19 @@ public:
     boost::asio::ip::tcp::socket get();
     bool is_full();
     bool is_empty();
+
+    template <typename Func>
+    auto luck (Func&& func)
+    {
+        std::unique_lock<std::mutex> lock(pool_mutex_);
+        return func();
+    }
+    template <typename Func>
+    auto lsck (Func&& func)
+    {
+        std::shared_lock<std::mutex> lock(pool_mutex_);
+        return func();
+    }
 };
 
 class ExpPool: public CONNECT_POOL
@@ -66,8 +81,8 @@ private:
     std::string user_;
     std::string password_;
 
-    int current_connections_;
-    int connect_limit_;
+    std::atomic<int> current_connections_;
+    std::atomic<int> connect_limit_;
 
     std::mutex pool_mutex_;
     std::condition_variable pool_cv_;
