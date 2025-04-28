@@ -3,7 +3,7 @@ build
 .vscode
 config/config.json
 config.cmake
-packs
+deps
 Taskfile.yml
 .vs
 CMakeLists.txt

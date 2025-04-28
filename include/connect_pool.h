@@ -2,9 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <queue>
-#include <thread>
 #include <mutex>
 #include <atomic>
 #include <shared_mutex>
@@ -15,8 +13,6 @@
 #include <boost/thread.hpp>
 
 #include <pqxx/pqxx>
-
-#include "methods.h"
 
 
 class CONNECT_POOL
