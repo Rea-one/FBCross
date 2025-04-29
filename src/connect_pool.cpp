@@ -1,4 +1,5 @@
 #include "connect_pool.h"
+#include <memory>
 
 CONNECT_POOL::CONNECT_POOL(int connect_limit):
     connect_limit_(connect_limit),
@@ -76,14 +77,15 @@ PQPool::PQPool(int connect_limit, std::string ip, int port,
         " password=" + password_;
     for (int order = 0; order < connect_limit_; order++)
     {
-        pqxx::connection conn(conn_str);
+        atuo conn = std::make_shared<dbng<postgresql>>();
+        conn -> connect(ip_, user_, password_);
         pool_.emplace(std::move(conn));
         current_connections_ ++;
         std::cout << "成功创建第" << current_connections_ << "个链接" << std::endl;
     }
 }
 
-bool PQPool::submit(pqxx::connection &&conn)
+bool PQPool::submit(std::shared_ptr<dbng<postgresql>> conn)
 {
     if (current_connections_ >= connect_limit_)
         return false;
@@ -93,7 +95,7 @@ bool PQPool::submit(pqxx::connection &&conn)
     return true;
 }
 
-pqxx::connection PQPool::get()
+std::shared_ptr<dbng<postgresql>> PQPool::get()
 {
     if (pool_.empty())
     {
@@ -101,12 +103,8 @@ pqxx::connection PQPool::get()
         {
             throw std::runtime_error("连接池满了，不允许再请求连接");
         }
-        pqxx::connection conn("host=" + ip_ + 
-            " port=" + std::to_string(port_) +
-            " dbname=" + dbname_ +
-            " user=" + user_ +
-            " password=" + password_);
-        current_connections_ ++;
+        auto conn = std::make_shared<dbng<postgresql>>();
+        conn -> connect(ip_, user_, password_);
         return conn;
     }
     else

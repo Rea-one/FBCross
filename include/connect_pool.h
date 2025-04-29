@@ -12,7 +12,8 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-#include <pqxx/pqxx>
+#include <dbng.hpp>
+#include <postgresql.hpp>
 
 
 class CONNECT_POOL
@@ -83,12 +84,12 @@ private:
     std::mutex pool_mutex_;
     std::condition_variable pool_cv_;
 
-    std::queue<pqxx::connection> pool_;
+    std::queue<std::shared_ptr<dbng<postgresql>>> pool_;
 public:
     PQPool(int connect_limit, std::string ip, int port,
         std::string dbname, std::string user, std::string password);
-    bool submit(pqxx::connection&& conn);
-    pqxx::connection get();
+    bool submit(std::shared_ptr<dbng<postgresql>> conn);
+    std::shared_ptr<dbng<postgresql>> get();
     bool is_full();
     bool is_empty();
     bool over_size();

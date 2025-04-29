@@ -33,7 +33,7 @@ void Worker::stop()
     thread_.join();
 }
 
-bool Worker::link(std::unique_ptr<pqxx::connection>&& conn)
+bool Worker::link(std::unique_ptr<dbng<postgresql>>&& conn)
 {
     if (conn_)
         return false;
@@ -123,9 +123,7 @@ std::string Worker::operation(std::string message)
 
     try
     {
-        pqxx::work txn(*conn_);
-        txn.exec(sql_mess);
-        txn.commit();
+        conn_ -> insert({sql_mess});
     }
     catch (const std::exception &e)
     {

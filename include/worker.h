@@ -10,7 +10,8 @@
 #include "boost/asio.hpp"
 #include "boost/thread.hpp"
 
-#include "pqxx/pqxx"
+#include <dbng.hpp>
+#include <postgresql.hpp>
 
 #include "to_sql.h"
 #include "IOmessage.h"
